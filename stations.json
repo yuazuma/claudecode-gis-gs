@@ -1,0 +1,190 @@
+{
+  "metadata": {
+    "title": "東京都中央区 ガソリンスタンド一覧",
+    "area": "東京都中央区",
+    "retrieval_date": "2026-04-16",
+    "kabuto_one": {
+      "name": "KABUTO ONE",
+      "address": "東京都中央区日本橋兜町7-1",
+      "lat": 35.68146,
+      "lng": 139.77837
+    },
+    "sources": [
+      {
+        "brand": "ENEOS",
+        "url": "https://www.eneos-mobilineer.com/servicestation/tokyo/",
+        "secondary_url": "https://eneos-ss.com/",
+        "note": "ENEOSモビリニア公式店舗検索 / eneos-ss.com 直接確認"
+      },
+      {
+        "brand": "出光 (apollostation)",
+        "url": "https://map.idemitsu.com/b/a/attr/?citycode=13102&t=attr_con",
+        "note": "出光興産SS検索サービス（中央区 citycode=13102）"
+      },
+      {
+        "brand": "コスモ石油",
+        "url": "https://cos.cosmo-oil.co.jp/shop-search/",
+        "note": "コスモ石油販売公式店舗検索 ※複数の経路で調査したが、東京都中央区内に店舗は確認できなかった"
+      }
+    ],
+    "geocoding_note": "座標は Nominatim (OpenStreetMap) による町丁目レベルのジオコーディング（近似値）"
+  },
+  "stations": [
+    {
+      "id": 1,
+      "brand": "ENEOS",
+      "name": "EneJetセルフ晴海店",
+      "operator": "(株)ENEOSモビリニア",
+      "address": "東京都中央区晴海5-2-12",
+      "phone": "03-6204-9460",
+      "service_type": "セルフ",
+      "hours": "24時間営業",
+      "lat": 35.6495,
+      "lng": 139.7751,
+      "source_url": "https://eneos-ss.com/search/ss/pc/detail.php?SCODE=341356"
+    },
+    {
+      "id": 2,
+      "brand": "ENEOS",
+      "name": "Dr.Drive 本石町SS",
+      "operator": "隅田商事(株)",
+      "address": "東京都中央区日本橋本石町4-3-7",
+      "phone": null,
+      "service_type": "フルサービス",
+      "hours": null,
+      "lat": 35.6862,
+      "lng": 139.7742,
+      "source_url": "https://www.eneos-mobilineer.com/servicestation/tokyo/"
+    },
+    {
+      "id": 3,
+      "brand": "ENEOS",
+      "name": "Dr.Drive 入船桜川SS",
+      "operator": "日新商事(株)東京支店",
+      "address": "東京都中央区入船1-3-5",
+      "phone": null,
+      "service_type": "セルフ",
+      "hours": null,
+      "lat": 35.6733,
+      "lng": 139.7777,
+      "source_url": "https://www.eneos-mobilineer.com/servicestation/tokyo/"
+    },
+    {
+      "id": 4,
+      "brand": "ENEOS",
+      "name": "Dr.Drive 月島SS",
+      "operator": "東新エナジー(株)",
+      "address": "東京都中央区佃2-18-8",
+      "phone": null,
+      "service_type": "フルサービス",
+      "hours": "24時間営業",
+      "lat": 35.6688,
+      "lng": 139.7866,
+      "source_url": "https://www.eneos-mobilineer.com/servicestation/tokyo/"
+    },
+    {
+      "id": 5,
+      "brand": "ENEOS",
+      "name": "Dr.Drive セルフ永代橋エコSS",
+      "operator": "隅田商事(株)",
+      "address": "東京都中央区新川1-29-14",
+      "phone": null,
+      "service_type": "セルフ",
+      "hours": "24時間営業",
+      "lat": 35.6786,
+      "lng": 139.7825,
+      "source_url": "https://www.eneos-mobilineer.com/servicestation/tokyo/"
+    },
+    {
+      "id": 6,
+      "brand": "ENEOS",
+      "name": "Dr.Drive 茅場町SS",
+      "operator": "隅田商事(株)",
+      "address": "東京都中央区日本橋茅場町3-1-11",
+      "phone": null,
+      "service_type": "フルサービス",
+      "hours": null,
+      "lat": 35.6802,
+      "lng": 139.7879,
+      "source_url": "https://www.eneos-mobilineer.com/servicestation/tokyo/"
+    },
+    {
+      "id": 7,
+      "brand": "ENEOS",
+      "name": "蛎殻町SS",
+      "operator": "(株)大釿",
+      "address": "東京都中央区日本橋蛎殻町1-34-9",
+      "phone": null,
+      "service_type": "フルサービス",
+      "hours": null,
+      "lat": 35.6826,
+      "lng": 139.7837,
+      "source_url": "https://www.eneos-mobilineer.com/servicestation/tokyo/"
+    },
+    {
+      "id": 8,
+      "brand": "ENEOS",
+      "name": "東日本橋SS",
+      "operator": "(株)トウモウ",
+      "address": "東京都中央区東日本橋3-5-11",
+      "phone": null,
+      "service_type": "フルサービス",
+      "hours": null,
+      "lat": 35.6890,
+      "lng": 139.7854,
+      "source_url": "https://www.eneos-mobilineer.com/servicestation/tokyo/"
+    },
+    {
+      "id": 9,
+      "brand": "ENEOS",
+      "name": "日本橋浜町SS",
+      "operator": "(株)トウモウ",
+      "address": "東京都中央区日本橋浜町3-2-4",
+      "phone": "03-5640-2160",
+      "service_type": "フルサービス",
+      "hours": "07:00-19:00",
+      "lat": 35.6852,
+      "lng": 139.7895,
+      "source_url": "https://gogo.gs/shop/1303000518"
+    },
+    {
+      "id": 10,
+      "brand": "ENEOS",
+      "name": "月島SS",
+      "operator": "(株)橋本富士商会",
+      "address": "東京都中央区月島2-6-12",
+      "phone": null,
+      "service_type": "フルサービス",
+      "hours": null,
+      "lat": 35.6624,
+      "lng": 139.7848,
+      "source_url": "https://www.eneos-mobilineer.com/servicestation/tokyo/"
+    },
+    {
+      "id": 11,
+      "brand": "出光 (apollostation)",
+      "name": "apollostation セルフ日本橋SS",
+      "operator": "ヤマヒロ(株)",
+      "address": "東京都中央区日本橋小網町18-12",
+      "phone": "03-3666-3066",
+      "service_type": "セルフ",
+      "hours": null,
+      "lat": 35.6820,
+      "lng": 139.7810,
+      "source_url": "https://map.idemitsu.com/b/a/attr/?citycode=13102&t=attr_con"
+    },
+    {
+      "id": 12,
+      "brand": "出光 (apollostation)",
+      "name": "apollostation 日本橋カズヲスタンドSS",
+      "operator": "明光石油(株)",
+      "address": "東京都中央区日本橋小網町7-10",
+      "phone": "03-3666-9603",
+      "service_type": "フルサービス",
+      "hours": null,
+      "lat": 35.6835,
+      "lng": 139.7818,
+      "source_url": "https://map.idemitsu.com/b/a/attr/?citycode=13102&t=attr_con"
+    }
+  ]
+}

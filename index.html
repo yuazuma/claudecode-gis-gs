@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>KABUTO ONE 周辺ガソリンスタンド</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Helvetica Neue', Arial, 'Hiragino Sans', 'Meiryo', sans-serif; background: #f0f2f5; }
+
+    #header {
+      background: #1a1a2e;
+      color: #fff;
+      padding: 10px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+      z-index: 1000;
+      position: relative;
+    }
+    #header h1 { font-size: 16px; font-weight: 700; }
+    #header-right { font-size: 11px; color: #8890aa; text-align: right; line-height: 1.6; }
+    #header-right a { color: #6ea4d8; text-decoration: none; }
+
+    #container { display: flex; height: calc(100vh - 46px); }
+    #map { flex: 1; }
+
+    #sidebar {
+      width: 310px;
+      background: #fff;
+      overflow-y: auto;
+      box-shadow: -2px 0 8px rgba(0,0,0,0.1);
+      display: flex;
+      flex-direction: column;
+    }
+
+    #sidebar-header {
+      background: #16213e;
+      color: #fff;
+      padding: 12px 14px;
+      font-size: 13px;
+      font-weight: 600;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    #filter-bar {
+      display: flex;
+      gap: 6px;
+      padding: 8px 10px;
+      background: #f5f6fa;
+      border-bottom: 1px solid #e0e4ee;
+      flex-wrap: wrap;
+    }
+    .filter-btn {
+      padding: 3px 10px;
+      border-radius: 12px;
+      border: 1.5px solid transparent;
+      font-size: 11px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.15s;
+      background: #fff;
+    }
+    .filter-btn.active { color: #fff; }
+    .filter-btn[data-brand="all"]    { border-color: #555; color: #555; }
+    .filter-btn[data-brand="ENEOS"] { border-color: #0066cc; color: #0066cc; }
+    .filter-btn[data-brand="idemitsu"] { border-color: #d4700f; color: #d4700f; }
+    .filter-btn[data-brand="all"].active    { background: #555; color: #fff; }
+    .filter-btn[data-brand="ENEOS"].active { background: #0066cc; }
+    .filter-btn[data-brand="idemitsu"].active { background: #d4700f; }
+
+    #status {
+      padding: 8px 12px;
+      font-size: 12px;
+      color: #666;
+      border-bottom: 1px solid #eee;
+      background: #fafafa;
+    }
+
+    .station-item {
+      padding: 10px 12px;
+      border-bottom: 1px solid #eee;
+      cursor: pointer;
+      transition: background 0.12s;
+    }
+    .station-item:hover { background: #f0f7ff; }
+    .station-item.hidden { display: none; }
+    .station-item.highlighted { background: #fff3e0; }
+
+    .station-row1 {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 3px;
+    }
+    .rank-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 22px; height: 22px;
+      border-radius: 50%;
+      color: #fff;
+      font-size: 11px;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+    .brand-tag {
+      font-size: 10px;
+      padding: 1px 6px;
+      border-radius: 3px;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+    .brand-eneos    { background: #e8f0fc; color: #0066cc; }
+    .brand-idemitsu { background: #fdf0e0; color: #d4700f; }
+
+    .station-name {
+      font-size: 12px;
+      font-weight: 600;
+      color: #222;
+      flex: 1;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .station-dist {
+      font-size: 12px;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+    .station-addr {
+      font-size: 11px;
+      color: #888;
+      padding-left: 28px;
+    }
+    .station-meta {
+      font-size: 10px;
+      color: #aaa;
+      padding-left: 28px;
+      margin-top: 2px;
+    }
+
+    .legend-box {
+      margin: 10px 12px;
+      font-size: 11px;
+      color: #555;
+      background: #f8f9fb;
+      border-radius: 6px;
+      padding: 10px;
+      border: 1px solid #e8eaf0;
+    }
+    .legend-title { font-weight: 700; margin-bottom: 7px; font-size: 12px; color: #333; }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      margin-bottom: 5px;
+    }
+    .legend-dot { width: 13px; height: 13px; border-radius: 50%; flex-shrink: 0; }
+    .legend-dash { width: 28px; height: 2px; border-top: 2px dashed; flex-shrink: 0; }
+    .source-box {
+      margin: 0 12px 12px;
+      font-size: 10px;
+      color: #aaa;
+      line-height: 1.7;
+    }
+    .source-box a { color: #6ea4d8; text-decoration: none; }
+
+    #loading-overlay {
+      position: absolute;
+      top: 46px; left: 0; right: 310px; bottom: 0;
+      background: rgba(255,255,255,0.88);
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      z-index: 999;
+      font-size: 14px; color: #333; gap: 12px;
+    }
+    .spinner {
+      width: 38px; height: 38px;
+      border: 4px solid #ddd;
+      border-top-color: #0066cc;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+
+<div id="header">
+  <h1>⛽ KABUTO ONE 周辺ガソリンスタンド（東京都中央区）</h1>
+  <div id="header-right">
+    データ出典: <a href="https://www.eneos-mobilineer.com/" target="_blank">ENEOS公式</a>
+    / <a href="https://map.idemitsu.com/" target="_blank">出光公式</a>
+    / <a href="https://cos.cosmo-oil.co.jp/shop-search/" target="_blank">コスモ公式</a>
+  </div>
+</div>
+
+<div id="container">
+  <div id="map"></div>
+  <div id="sidebar">
+    <div id="sidebar-header">📍 ガソリンスタンド一覧（KABUTO ONEからの直線距離順）</div>
+    <div id="filter-bar">
+      <button class="filter-btn active" data-brand="all">すべて</button>
+      <button class="filter-btn" data-brand="ENEOS">ENEOS</button>
+      <button class="filter-btn" data-brand="idemitsu">出光</button>
+    </div>
+    <div id="status">データ読み込み中...</div>
+    <div id="station-list"></div>
+    <div class="legend-box">
+      <div class="legend-title">凡例</div>
+      <div class="legend-item">
+        <div class="legend-dot" style="background:#1a5fb4;border:2px solid #fff;box-shadow:0 0 0 2px #1a5fb4;"></div>
+        KABUTO ONE（基準点）
+      </div>
+      <div class="legend-item">
+        <div class="legend-dot" style="background:#0066cc;"></div>
+        ENEOS
+      </div>
+      <div class="legend-item">
+        <div class="legend-dot" style="background:#d4700f;"></div>
+        出光 (apollostation)
+      </div>
+      <div class="legend-item">
+        <div class="legend-dash" style="border-color:#0066cc;"></div>
+        直線距離（ENEOS）
+      </div>
+      <div class="legend-item">
+        <div class="legend-dash" style="border-color:#d4700f;"></div>
+        直線距離（出光）
+      </div>
+      <div style="margin-top:6px;color:#bbb;font-size:10px;">
+        ※ コスモ石油は中央区内に店舗なし（公式サイト調査済）<br>
+        ※ 座標はジオコーディングによる近似値
+      </div>
+    </div>
+    <div class="source-box" id="source-box"></div>
+  </div>
+</div>
+
+<div id="loading-overlay">
+  <div class="spinner"></div>
+  <div>stations.json を読み込み中...</div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+// =====================================================
+// ブランド設定
+// =====================================================
+const BRAND_CONFIG = {
+  "ENEOS": {
+    color: "#0066cc",
+    markerBg: "#0066cc",
+    tag: "brand-eneos",
+    label: "ENEOS"
+  },
+  "出光 (apollostation)": {
+    color: "#d4700f",
+    markerBg: "#d4700f",
+    tag: "brand-idemitsu",
+    label: "apollostation"
+  }
+};
+
+function getBrand(brandStr) {
+  if (brandStr.startsWith("ENEOS")) return "ENEOS";
+  if (brandStr.includes("出光") || brandStr.includes("apollo")) return "出光 (apollostation)";
+  return brandStr;
+}
+
+// =====================================================
+// Haversine 距離（m）
+// =====================================================
+function haversine(lat1, lng1, lat2, lng2) {
+  const R = 6371000, r = d => d * Math.PI / 180;
+  const dLat = r(lat2 - lat1), dLng = r(lng2 - lng1);
+  const a = Math.sin(dLat/2)**2 + Math.cos(r(lat1))*Math.cos(r(lat2))*Math.sin(dLng/2)**2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+}
+function fmtDist(m) {
+  return m < 1000 ? `${Math.round(m)}m` : `${(m/1000).toFixed(2)}km`;
+}
+
+// =====================================================
+// 地図初期化
+// =====================================================
+const map = L.map('map', { center: [35.68146, 139.77837], zoom: 14 });
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+  maxZoom: 19
+}).addTo(map);
+
+// =====================================================
+// KABUTO ONE マーカー
+// =====================================================
+function makeKabutoIcon() {
+  return L.divIcon({
+    className: '',
+    html: `<div style="
+      background:#1a5fb4;color:#fff;border:3px solid #fff;
+      border-radius:50% 50% 50% 0;transform:rotate(-45deg);
+      width:34px;height:34px;box-shadow:0 2px 10px rgba(0,0,0,0.45);
+      display:flex;align-items:center;justify-content:center;
+    "><span style="transform:rotate(45deg);font-size:15px;">🏢</span></div>`,
+    iconSize:[34,34], iconAnchor:[17,34], popupAnchor:[0,-36]
+  });
+}
+
+// =====================================================
+// ガソリンスタンド アイコン
+// =====================================================
+function makeStationIcon(rank, color) {
+  const rankColors = ['#c9a227','#7f8c8d','#a0522d'];
+  const bg = rank < 3 ? rankColors[rank] : color;
+  return L.divIcon({
+    className: '',
+    html: `<div style="
+      background:${bg};color:#fff;border:2.5px solid #fff;border-radius:50%;
+      width:26px;height:26px;box-shadow:0 2px 7px rgba(0,0,0,0.38);
+      display:flex;align-items:center;justify-content:center;
+      font-size:11px;font-weight:700;
+    ">${rank+1}</div>`,
+    iconSize:[26,26], iconAnchor:[13,13], popupAnchor:[0,-15]
+  });
+}
+
+// =====================================================
+// 線の色（ブランド別）
+// =====================================================
+function lineColor(brand) {
+  const cfg = BRAND_CONFIG[brand];
+  return cfg ? cfg.color : '#666';
+}
+
+// =====================================================
+// メイン：データ読み込み → 描画
+// =====================================================
+async function loadData() {
+  let data;
+  try {
+    const res = await fetch('./stations.json');
+    if (!res.ok) throw new Error('fetch failed');
+    data = await res.json();
+  } catch {
+    // stations.json を fetch できない場合（file://プロトコル等）はエラー表示
+    document.getElementById('loading-overlay').innerHTML =
+      `<div style="color:#c0392b;font-size:13px;text-align:center;padding:20px;">
+        ⚠️ stations.json の読み込みに失敗しました。<br>
+        <span style="font-size:11px;color:#888;margin-top:8px;display:block;">
+          ローカルサーバー（例: <code>python -m http.server</code>）で開いてください。
+        </span>
+      </div>`;
+    return;
+  }
+  document.getElementById('loading-overlay').style.display = 'none';
+  render(data);
+}
+
+function render(data) {
+  const meta = data.metadata;
+  const kabuto = meta.kabuto_one;
+
+  // KABUTO ONE マーカー
+  L.marker([kabuto.lat, kabuto.lng], { icon: makeKabutoIcon(), zIndexOffset: 1000 })
+    .addTo(map)
+    .bindPopup(`
+      <div style="font-size:13px;font-weight:700;margin-bottom:3px;">🏢 ${kabuto.name}</div>
+      <div style="font-size:11px;color:#666;">${kabuto.address}</div>
+    `, { maxWidth: 220 });
+
+  // 距離を計算してソート
+  const stations = data.stations.map(s => ({
+    ...s,
+    dist: haversine(kabuto.lat, kabuto.lng, s.lat, s.lng),
+    brandKey: getBrand(s.brand)
+  })).sort((a, b) => a.dist - b.dist);
+
+  // データ概要
+  const eneosCount = stations.filter(s => s.brandKey === "ENEOS").length;
+  const idemitsuCount = stations.filter(s => s.brandKey === "出光 (apollostation)").length;
+  document.getElementById('status').innerHTML =
+    `<b>${stations.length}件</b>（ENEOS: ${eneosCount}件 / 出光: ${idemitsuCount}件 / コスモ: 0件）`;
+
+  // ソース情報
+  const srcBox = document.getElementById('source-box');
+  srcBox.innerHTML = '<b style="color:#888;">データ出典：</b><br>' +
+    meta.sources.map(s =>
+      `・<a href="${s.url}" target="_blank">${s.brand}</a> — ${s.note}`
+    ).join('<br>') +
+    `<br><br><span style="font-size:9px;">※${meta.geocoding_note}</span>`;
+
+  const layerGroup = L.layerGroup().addTo(map);
+  const itemsMap = {}; // id -> { marker, line, label, item }
+
+  stations.forEach((s, i) => {
+    const cfg = BRAND_CONFIG[s.brandKey] || { color: '#555', tag: '', label: s.brand };
+    const color = cfg.color;
+
+    // 直線
+    const line = L.polyline([[kabuto.lat, kabuto.lng],[s.lat, s.lng]], {
+      color, weight: 2, dashArray: '5,4', opacity: 0.75
+    }).addTo(layerGroup);
+
+    // 距離ラベル（中間点）
+    const midLat = (kabuto.lat + s.lat) / 2;
+    const midLng = (kabuto.lng + s.lng) / 2;
+    const label = L.marker([midLat, midLng], {
+      icon: L.divIcon({
+        className: '',
+        html: `<div style="
+          background:rgba(255,255,255,0.92);border:1px solid ${color};
+          border-radius:4px;padding:1px 5px;font-size:10px;font-weight:700;
+          color:${color};white-space:nowrap;box-shadow:0 1px 4px rgba(0,0,0,0.18);
+        ">${fmtDist(s.dist)}</div>`,
+        iconAnchor:[22,9]
+      }),
+      interactive: false
+    }).addTo(layerGroup);
+
+    // マーカー
+    const marker = L.marker([s.lat, s.lng], { icon: makeStationIcon(i, color) })
+      .addTo(layerGroup)
+      .bindPopup(`
+        <div style="min-width:170px;">
+          <div style="font-size:12px;font-weight:700;margin-bottom:4px;">⛽ ${s.name}</div>
+          <div style="font-size:10px;margin-bottom:2px;">
+            <span style="background:${color};color:#fff;padding:1px 6px;border-radius:3px;font-weight:700;font-size:10px;">${cfg.label}</span>
+            <span style="color:#888;margin-left:4px;">${s.service_type || ''}</span>
+          </div>
+          <div style="font-size:11px;color:#555;margin:4px 0;">${s.address}</div>
+          ${s.phone ? `<div style="font-size:11px;color:#888;">☎ ${s.phone}</div>` : ''}
+          ${s.hours ? `<div style="font-size:11px;color:#888;">🕐 ${s.hours}</div>` : ''}
+          <div style="font-size:12px;color:${color};font-weight:700;margin-top:5px;">
+            KABUTO ONE まで <b>${fmtDist(s.dist)}</b>（直線）
+          </div>
+          <div style="font-size:10px;color:#bbb;margin-top:2px;">順位: ${i+1}番目に近い</div>
+          <div style="margin-top:5px;">
+            <a href="${s.source_url}" target="_blank" style="font-size:10px;color:#6ea4d8;">公式ページ →</a>
+          </div>
+        </div>
+      `, { maxWidth: 230 });
+
+    // サイドバーアイテム
+    const item = document.createElement('div');
+    item.className = 'station-item';
+    item.dataset.brand = s.brandKey;
+    item.innerHTML = `
+      <div class="station-row1">
+        <span class="rank-badge" style="background:${i<3?['#c9a227','#7f8c8d','#a0522d'][i]:color}">${i+1}</span>
+        <span class="brand-tag ${cfg.tag}">${cfg.label}</span>
+        <span class="station-name">${s.name}</span>
+        <span class="station-dist" style="color:${color}">${fmtDist(s.dist)}</span>
+      </div>
+      <div class="station-addr">${s.address}</div>
+      ${s.service_type || s.hours ? `<div class="station-meta">${[s.service_type, s.hours].filter(Boolean).join(' ／ ')}</div>` : ''}
+    `;
+    item.addEventListener('click', () => {
+      map.setView([s.lat, s.lng], 17, { animate: true });
+      marker.openPopup();
+      // ハイライト
+      stations.forEach((_, j) => {
+        const info = itemsMap[j];
+        if (!info) return;
+        const isSel = j === i;
+        info.line.setStyle({ opacity: isSel ? 1 : 0.2, weight: isSel ? 3 : 2 });
+        info.item.classList.toggle('highlighted', isSel);
+      });
+    });
+
+    document.getElementById('station-list').appendChild(item);
+    itemsMap[i] = { marker, line, label, item };
+  });
+
+  // フィルターボタン
+  document.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const brand = btn.dataset.brand;
+
+      let visibleCount = 0;
+      stations.forEach((s, i) => {
+        const info = itemsMap[i];
+        if (!info) return;
+        const show = brand === 'all' || brand === s.brandKey ||
+                     (brand === 'idemitsu' && s.brandKey === '出光 (apollostation)');
+        info.item.classList.toggle('hidden', !show);
+        info.line.setStyle({ opacity: show ? 0.75 : 0 });
+        info.label.setOpacity ? info.label.setOpacity(show ? 1 : 0) : null;
+        if (show) { info.label._icon && (info.label._icon.style.display = ''); visibleCount++; }
+        else { info.label._icon && (info.label._icon.style.display = 'none'); }
+        show ? layerGroup.addLayer(info.marker) : layerGroup.removeLayer(info.marker);
+      });
+    });
+  });
+
+  // 地図をフィット
+  const bounds = L.latLngBounds([[kabuto.lat, kabuto.lng]]);
+  stations.forEach(s => bounds.extend([s.lat, s.lng]));
+  map.fitBounds(bounds.pad(0.1));
+}
+
+loadData();
+</script>
+</body>
+</html>
